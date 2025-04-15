@@ -74,6 +74,7 @@ const CodeEditor = ({
             onChange={(value) => {
                 // console.log("Updated code:", value); // Log the updated value
                 setCurrentCode(value);
+        
             }}
             
             basicSetup={{

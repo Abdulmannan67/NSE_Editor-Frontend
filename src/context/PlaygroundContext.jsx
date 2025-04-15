@@ -234,6 +234,42 @@ const PlaygroundProvider = ({ children }) => {
 
 
 
+
+
+
+
+//update file data
+
+    const updateFileData = async (folderName, filename, content) => {
+        const token = localStorage.getItem('token');
+        try {
+            const response = await fetch(`http://localhost:5000/auth/fil/${folderName}/${filename}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    // 'Authorization': `Bearer ${localStorage.getItem('userToken')}`,
+                    Authorization: `Bearer ${token}`,
+                },
+                body: JSON.stringify({ content }),
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to update file');
+            }
+
+            alert('File update');
+            fetchFiles(); // Refresh the file list if needed
+        } catch (error) {
+            console.error('Error updating file:', error);
+            alert('Error updating file');
+        }
+    };
+
+
+
+    
+
+
     //update folder name 
     const updateFolder = async (folderName,newFolderName) => {
         const token = localStorage.getItem('token');
@@ -274,7 +310,8 @@ const PlaygroundProvider = ({ children }) => {
         updateFileContent,
         updateFolder,
         addPlaygroundAndFolder,
-        addfile 
+        addfile ,
+        updateFileData
         
     };
 

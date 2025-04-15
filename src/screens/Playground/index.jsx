@@ -20,13 +20,14 @@ const MainContainer = styled.div`
 const Consoles = styled.div`
   display: grid;
   width: 100%;
+  height: 80vh;
   grid-template-rows: 1fr 1fr;
   grid-template-columns: 1fr;
 `;
 
 const Playground = () => {
   const { folderId, playgroundId } = useParams();
-  const { folders } = useContext(PlaygroundContext);
+  const { folders,updateFileContent,updateFileData } = useContext(PlaygroundContext);
   const { isOpenModal, openModal } = useContext(ModalContext);
   const [FileDetails, setFileDetails] = useState({});
   const { title, language, code } = FileDetails;
@@ -42,14 +43,22 @@ const Playground = () => {
   const [applicationId, setApplicationId] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+
+  
+
   useEffect(() => {
+   
     if (folders && folders.length > 0) {
       const fileDetails = findFileDetails();
       setFileDetails(fileDetails);
+      setCurrentCode(code)
     } else {
       console.warn("Folders are empty or not fetched yet");
     }
-  }, [folders, folderId, playgroundId]);
+  }, [folders, folderId, playgroundId,code]);
+
+
+
 
   const findFileDetails = () => {
     if (!folders || !Array.isArray(folders) || folders.length === 0) {
@@ -70,9 +79,28 @@ const Playground = () => {
     };
   };
 
+
+
+
+
+
+
   const closeModal = () => {
     openModal({ show: false });
   };
+
+
+
+
+
+  const saveCode= async ()=>{
+      updateFileData( folderId,title, currentCode)
+    }
+  
+
+
+
+
 
   const runCode = async () => {
     openModal({
@@ -160,9 +188,10 @@ const Playground = () => {
           title={title}
           currentLanguage={currentLanguage}
           setediLanguage={setediLanguage}
-          currentCode={code}
+          currentCode={currentCode}
           setCurrentCode={setCurrentCode}
           folderId={folderId}
+          saveCode={saveCode}
           playgroundId={playgroundId}
           runCode={runCode}
           isFullScreen={isFullScreen}

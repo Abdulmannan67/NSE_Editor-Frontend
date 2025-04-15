@@ -171,7 +171,6 @@ const EditorContainer = ({
   const handleThemeChange = (selectedOption) => {
     setCurrentTheme(selectedOption)
   }
-
   const handleLanguageChange = (selectedOption) => {
     setLanguage(selectedOption)
     setediLanguage(selectedOption.label)
