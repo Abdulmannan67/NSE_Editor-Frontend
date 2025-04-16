@@ -39,7 +39,8 @@ const NewPlayground = () => {
 
   const languageOptions = [
     { value: "py", label: "PySpark" },
-    { value: "sql", label: "SQL" },
+    { value: "sql", label: "HiveQL" },
+    { value: "sql", label: "Impala" },
 
   ];
 
@@ -70,7 +71,7 @@ const NewPlayground = () => {
           onChange={handleLanguageChange}
         />
         <button onClick={() => {
-          addfile(folderId, cardTitle, language.label)
+          addfile(folderId, cardTitle, language.value)
           closeModal();
         }}> Create New File</button>
       </InputWithSelect>

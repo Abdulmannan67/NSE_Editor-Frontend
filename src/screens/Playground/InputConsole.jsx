@@ -2,7 +2,8 @@ import React from 'react'
 import styled from 'styled-components'
 import { BiImport } from 'react-icons/bi'
 export const Console = styled.div`
-  background: #fff;
+  background: rgb(30, 30, 30);
+  color: white;
   display: flex;
   flex-direction: column;
 `

@@ -21,7 +21,7 @@ const NavbarContent = styled.button`
 `
 
 const Logo = styled.img`
-  width: 60px;
+  width: 45px;
 `
 
 const MainHeading = styled.h1`
@@ -43,7 +43,7 @@ const Navbar = ({ isFullScreen }) => {
       }}>
         <Logo src={logo} />
         <MainHeading>
-          <span>NSE</span> Coder
+          <span>Code</span>Catalyst
         </MainHeading>
       </NavbarContent>
     </NavbarContainer>

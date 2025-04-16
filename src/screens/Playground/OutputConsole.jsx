@@ -2,7 +2,7 @@ import React from 'react';
 import { Console, Header } from './InputConsole';
 import { BiExport } from 'react-icons/bi';
 
-const OutputConsole = ({ logs, applicationId, jobId, isSubmitting, language }) => {
+const OutputConsole = ({ logs, applicationId, jobId, isSubmitting, language, isFullScreen }) => {
   const YARN_UI_BASE_URL = 'http://localhost:8088';
 
   const viewYarnApplication = () => {
@@ -12,37 +12,30 @@ const OutputConsole = ({ logs, applicationId, jobId, isSubmitting, language }) =
     }
   };
 
+
   let parsedData = null;
   let parsingError = null;
 
   // Parse Hive/Impala output if applicable
   if (logs.length > 0 && (language === 'Impala' || language === 'hiveQL')) {
     try {
-      parsedData = parseBeelineTable(logs[0]); // Parse the single log entry
+      parsedData = parseBeelineTable(logs[0]);
     } catch (err) {
       parsingError = err.message;
     }
   }
 
   return (
-    <Console>
+    <Console style={{ width: '100%', maxWidth: '100%', boxSizing: 'border-box' }}>
       <Header>
-      {applicationId ? (
-  <span 
-    style={{ cursor: 'pointer', marginRight: '10px' }} 
-    onClick={viewYarnApplication}
-  >
-    <BiExport /> View YARN Application
-  </span>
-) : (
-  <>
-    <BiExport />Output
-  </>
-)}
-
-        
-          
-        
+        {applicationId && (
+          <span style={{ cursor: 'pointer', marginRight: '10px' }} onClick={viewYarnApplication}>
+            <BiExport /> View YARN Application
+          </span>
+        )}
+        <a href={`data:text/plain;charset=utf-8,${encodeURIComponent(logs.join('\n'))}`} download="output.txt">
+          <BiExport /> Export Output
+        </a>
       </Header>
 
       <div
@@ -50,22 +43,50 @@ const OutputConsole = ({ logs, applicationId, jobId, isSubmitting, language }) =
           padding: '10px',
           fontFamily: 'monospace',
           whiteSpace: 'pre-wrap',
-          maxHeight: '500px',
+          maxHeight: '480px',
           overflowY: 'auto',
-          maxWidth: '100%', // Constrain width to parent
-          overflowX: 'auto', // Enable horizontal scrolling
-          wordBreak: 'break-word', // Break long words if needed
+          maxWidth: '100%',
+          overflowX: 'hidden', // No scrollbar for logs
+          wordBreak: 'break-word',
         }}
       >
         {logs.length > 0 ? (
           language === 'Impala' || language === 'hiveQL' ? (
             parsedData ? (
-              <div style={{ overflowX: 'auto' }}>
-                <table border="1" style={{ width: '100%', borderCollapse: 'collapse' }}>
+              <div
+                style={{
+                  width: isFullScreen ? '98vw' : '23vw', // Dynamic width
+                  maxWidth: '100%',
+                  overflowX: 'auto',
+                  border: '1px solid #ddd',
+                  borderRadius: '4px',
+                  boxSizing: 'border-box',
+                }}
+              >
+                <table
+                  style={{
+                    borderCollapse: 'collapse',
+                    fontSize: '12px',
+                    color: "black",
+                    minWidth: parsedData.headers.length * 100 + 'px', // Wide table
+                  }}
+                >
                   <thead>
                     <tr>
                       {parsedData.headers.map((header, index) => (
-                        <th key={index} style={{ padding: '8px', background: '#444', color: '#fff' }}>
+                        <th
+                          key={index}
+                          style={{
+                            padding: '8px',
+                            background: '#f5f5f5',
+                            color: '#333',
+                            border: '1px solid #ddd',
+                            width: '100px',
+                            textAlign: 'left',
+                            fontWeight: 'bold',
+                            whiteSpace: 'nowrap',
+                          }}
+                        >
                           {header}
                         </th>
                       ))}
@@ -75,7 +96,17 @@ const OutputConsole = ({ logs, applicationId, jobId, isSubmitting, language }) =
                     {parsedData.tableData.map((row, rowIndex) => (
                       <tr key={rowIndex}>
                         {Object.values(row).map((value, colIndex) => (
-                          <td key={colIndex} style={{ padding: '8px', textAlign: 'center' }}>
+                          <td
+                            key={colIndex}
+                            style={{
+                              padding: '8px',
+                              border: '1px solid #ddd',
+                              width: '100px',
+                              textAlign: 'left',
+                              whiteSpace: 'nowrap',
+                              backgroundColor: rowIndex % 2 === 0 ? '#fff' : '#fafafa',
+                            }}
+                          >
                             {value}
                           </td>
                         ))}
@@ -86,14 +117,28 @@ const OutputConsole = ({ logs, applicationId, jobId, isSubmitting, language }) =
               </div>
             ) : (
               logs.map((log, index) => (
-                <div key={index} style={{ color: log.startsWith('Error:') ? 'red' : 'inherit' }}>
+                <div
+                  key={index}
+                  style={{
+                    color: log.startsWith('Error:') ? 'red' : 'inherit',
+                    whiteSpace: 'pre-wrap',
+                    maxWidth: '100%',
+                  }}
+                >
                   {log}
                 </div>
               ))
             )
           ) : (
             logs.map((log, index) => (
-              <div key={index} style={{ color: log.startsWith('[ERROR]') || log.startsWith('Error:') ? 'red' : 'inherit' }}>
+              <div
+                key={index}
+                style={{
+                  color: log.startsWith('[ERROR]') || log.startsWith('Error:') ? 'red' : 'inherit',
+                  whiteSpace: 'pre-wrap',
+                  maxWidth: '100%',
+                }}
+              >
                 {log}
               </div>
             ))

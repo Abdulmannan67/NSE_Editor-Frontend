@@ -5,6 +5,7 @@ import { BiEditAlt, BiImport, BiExport, BiFullscreen } from 'react-icons/bi'
 import { ModalContext } from '../../context/ModalContext'
 import Select from 'react-select';
 import { languageMap } from '../../context/PlaygroundContext'
+import { useEffect } from 'react'
 
 const StyledEditorContainer = styled.div`
   display: flex;
@@ -93,12 +94,13 @@ const LowerToolBar = styled.div`
   position: sticky; /* Sticky positioning */
   bottom: 0; /* Stick to the bottom of the container */
   display: flex;
+  background: rgb(30, 30, 30);
   align-items: center;
   justify-content: space-between;
   flex-wrap: wrap;
   gap: 0.8rem;
   padding: 0.8rem 1rem;
-  background: white; /* Add background color to avoid transparency */
+   /* Add background color to avoid transparency */
   z-index: 10; /* Ensure it stays on top of other elements */
 
   input {
@@ -107,11 +109,12 @@ const LowerToolBar = styled.div`
 
   label, a, button {
     font-size: 1.2rem;
+    color: white;
     border: none;
     display: flex;
     align-items: center;
     gap: 0.7rem;
-    color: black;
+  
   }
   
   button:first-child {
@@ -161,16 +164,29 @@ const EditorContainer = ({
     { value: 'okaidia', label: 'okaidia' },
   ]
 
-  const languageOptions = [
-   
-    { value: 'py', label: 'PySpark' },
-    { value: 'sql', label: 'hiveQL' },
-    { value: 'sql', label: 'Impala' }
-  ]
+
+  useEffect(() => {
+
+   if (currentLanguage=="sql") {
+      setlanguageOptions([  
+        { value: 'sql', label: 'hiveQL' },
+        { value: 'sql', label: 'Impala' }
+      ])
+   }else if(currentLanguage=="py"){
+    setlanguageOptions([  
+      { value: 'py', label: 'PySpark' }
+        ])
+    
+   }
+  }, [currentLanguage])
+  
+const [languageOptions, setlanguageOptions] = useState([])
+
 
   const handleThemeChange = (selectedOption) => {
     setCurrentTheme(selectedOption)
   }
+
   const handleLanguageChange = (selectedOption) => {
     setLanguage(selectedOption)
     setediLanguage(selectedOption.label)
@@ -199,14 +215,14 @@ const EditorContainer = ({
         <Header>
           <Title>
             <h3>{title}</h3>
-            <BiEditAlt onClick={() => openModal({
+            {/* <BiEditAlt onClick={() => openModal({
               show: true,
               modalType: 5,
               identifiers: {
                 folderId: folderId,
                 cardId: playgroundId,
               }
-            })} />
+            })} /> */}
           </Title>
           <Button onClick={saveCode}>Save code</Button>
         </Header>

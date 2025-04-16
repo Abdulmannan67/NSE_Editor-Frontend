@@ -10,8 +10,10 @@ import Modal from '../../components/Modal';
 
 const MainContainer = styled.div`
   display: grid;
-  grid-template-columns: ${({ isFullScreen }) => (isFullScreen ? '1fr' : '2fr 1fr')};
+  grid-template-columns: ${({ isFullScreen }) => (isFullScreen ? '1fr' : '3.5fr 1fr')};
   min-height: ${({ isFullScreen }) => (isFullScreen ? '100vh' : 'calc(100vh - 4.5rem)')};
+  max-width: 100%;
+  box-sizing: border-box;
   @media (max-width: 768px) {
     grid-template-columns: 1fr;
   }
@@ -19,10 +21,13 @@ const MainContainer = styled.div`
 
 const Consoles = styled.div`
   display: grid;
+  border-left: 1px solid black;
   width: 100%;
-  height: 80vh;
-  grid-template-rows: 1fr 1fr;
+  max-width: 100%;
+  grid-template-rows: 1fr;
   grid-template-columns: 1fr;
+  box-sizing: border-box;
+  overflow: visible;
 `;
 
 const Playground = () => {
@@ -32,11 +37,12 @@ const Playground = () => {
   const [FileDetails, setFileDetails] = useState({});
   const { title, language, code } = FileDetails;
 
-  const [currentLanguage] = useState(language);
+  const [currentLanguage, setcurrentLanguage] = useState(language);
   const [editLanguage, setediLanguage] = useState(language);
   const [currentCode, setCurrentCode] = useState(code);
   const [logs, setLogs] = useState([]); // Unified logs for Spark, Hive, Impala
   const [isFullScreen, setIsFullScreen] = useState(false);
+  
 
   // FOR SPARK
   const [jobId, setJobId] = useState(null);
@@ -44,7 +50,7 @@ const Playground = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
 
-  
+  console.log(applicationId)
 
   useEffect(() => {
    
@@ -52,6 +58,7 @@ const Playground = () => {
       const fileDetails = findFileDetails();
       setFileDetails(fileDetails);
       setCurrentCode(code)
+      setcurrentLanguage(language)
     } else {
       console.warn("Folders are empty or not fetched yet");
     }
@@ -110,9 +117,10 @@ const Playground = () => {
     });
 
     setLogs([]);
-    setIsSubmitting(true);
+    
 
     if (editLanguage === "Impala") {
+      setIsSubmitting(true);
       const response = await fetch("http://localhost:5000/auth/run-impala-query", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -127,6 +135,7 @@ const Playground = () => {
       }
       setIsSubmitting(false);
     } else if (editLanguage === "hiveQL") {
+      setIsSubmitting(true);
       const response = await fetch("http://localhost:5000/auth/run-hive-query", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -141,6 +150,7 @@ const Playground = () => {
       }
       setIsSubmitting(false);
     } else if (editLanguage === "PySpark") {
+      setIsSubmitting(true);
       setJobId(null);
       setApplicationId(null);
 
@@ -156,6 +166,7 @@ const Playground = () => {
 
         if (data.jobId) setJobId(data.jobId);
         if (data.applicationId) setApplicationId(data.applicationId);
+        console.log(data.applicationId)
         if (data.log) {
           setLogs(prevLogs => [...prevLogs, data.log]);
         }
@@ -175,6 +186,8 @@ const Playground = () => {
         setIsSubmitting(false);
         source.close();
       };
+    } else{
+      alert("Please select hive/impala/pypark")
     }
 
     closeModal();
@@ -182,6 +195,7 @@ const Playground = () => {
 
   return (
     <div>
+      
       <Navbar isFullScreen={isFullScreen} />
       <MainContainer isFullScreen={isFullScreen}>
         <EditorContainer
@@ -203,6 +217,7 @@ const Playground = () => {
             applicationId={applicationId}
             jobId={jobId}
             isSubmitting={isSubmitting}
+            isFullScreen={isFullScreen}
             language={editLanguage}
           />
         </Consoles>
