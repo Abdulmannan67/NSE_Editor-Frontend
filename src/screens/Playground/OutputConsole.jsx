@@ -29,11 +29,19 @@ const OutputConsole = ({ logs, applicationId, jobId, isSubmitting, language, isF
     <Console style={{ width: '100%', maxWidth: '100%', boxSizing: 'border-box' }}>
       <Header>
         {applicationId && (
-          <span style={{ cursor: 'pointer', marginRight: '10px' }} onClick={viewYarnApplication}>
+          <span style={{ cursor: 'pointer',fontSize: "13px",margin: "2px",fontWeight: "bold",
+            paddingBottom: "2px",
+            paddingTop: "2px",
+            visibility: "visible",
+            color: "hsl(0, 0%, 20%)",}} onClick={viewYarnApplication}>
             <BiExport /> View YARN Application
           </span>
         )}
-        <a href={`data:text/plain;charset=utf-8,${encodeURIComponent(logs.join('\n'))}`} download="output.txt">
+        <a style={{ cursor: 'pointer' ,fontSize: "13px", textDecoration: "none",fontWeight: "bold",  margin: "2px",
+            paddingBottom: "2px",
+            paddingTop: "2px",
+            visibility: "visible",
+            color: "hsl(0, 0%, 20%)",}} href={`data:text/plain;charset=utf-8,${encodeURIComponent(logs.join('\n'))}`} download="output.txt">
           <BiExport /> Export Output
         </a>
       </Header>

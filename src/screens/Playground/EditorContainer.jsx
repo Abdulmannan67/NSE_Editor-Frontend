@@ -254,11 +254,6 @@ const [languageOptions, setlanguageOptions] = useState([])
           <BiFullscreen /> {isFullScreen ? 'Minimize Screen' : 'Full Screen'}
         </button>
 
-        <label htmlFor="codefile">
-          <input type="file" accept="." id="codefile"  /> 
-          <BiImport /> Import Code
-        </label>
-
         <a href={`data:text/plain;charset=utf-8,${encodeURIComponent(currentCode)}`} download="code.txt">
           <BiExport /> Export Code
         </a>
