@@ -4,9 +4,28 @@ import { IoCloseSharp } from 'react-icons/io5'
 import { ModalContext } from '../../context/ModalContext'
 import { PlaygroundContext } from '../../context/PlaygroundContext'
 const NewFolder = () => {
-  const { closeModal } = useContext(ModalContext);
-  const { addFolder } = useContext(PlaygroundContext)
+  const {isOpenModal, closeModal } = useContext(ModalContext);
+  const { addFolder,nestAddFolder } = useContext(PlaygroundContext)
   const [folderTitle, setFolderTitle] = useState("");
+  
+  const {folderId} = isOpenModal.identifiers;
+
+  const handleAdd=()=>{
+    if (!folderTitle.trim()) {
+      alert('Title cannot be empty!'); // Prevent updating with an empty or blank title
+      return;
+    } else if (folderId==="") {
+      addFolder(folderTitle)
+     closeModal()
+    } else if(folderId && folderId.trim() !== "") {
+      nestAddFolder(folderId,folderTitle)
+      closeModal()
+    }
+    
+  }
+
+  
+
 
   return (
     <>
@@ -18,10 +37,7 @@ const NewFolder = () => {
       </Header>
       <Input>
         <input type="text" onChange={(e) => setFolderTitle(e.target.value)} />
-        <button onClick={() => {
-          addFolder(folderTitle)
-          closeModal()
-        }}>Create Folder</button>
+        <button onClick={handleAdd}> Create Folder</button>
       </Input>
     </>
   )

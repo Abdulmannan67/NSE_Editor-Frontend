@@ -8,7 +8,7 @@ const EditFolder = () => {
   const { closeModal, isOpenModal } = useContext(ModalContext);
   const { updateFolder } = useContext(PlaygroundContext);
 
-  const folderId = isOpenModal.identifiers.folderName;
+  const {folderId} = isOpenModal.identifiers || {};
  
   const [folderTitle, setFolderTitle] = useState(folderId);
 

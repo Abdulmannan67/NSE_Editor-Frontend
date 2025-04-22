@@ -9,8 +9,8 @@ export const Console = styled.div`
 `
 
 export const Header = styled.div`
-  background: #ededed;
-  height: 4.5rem;
+  height: 5vh;
+  border-top: 2px solid rgba(82, 77, 77, 0.83);
   box-shadow: 0 4px 4px rgba(0, 0, 0, 0.16);
   padding: 0 1rem;
   z-index: 2;

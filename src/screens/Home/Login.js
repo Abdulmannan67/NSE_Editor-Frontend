@@ -1,10 +1,13 @@
-import React, { useState } from 'react';
+import React, { useState ,useContext} from 'react';
 import "./login.css";
 import { Link, useNavigate } from "react-router-dom";
+import { PlaygroundContext } from '../../context/PlaygroundContext';
+
 
 const Login = () => {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
+    
     const navigate = useNavigate(); // Hook for navigation
 
     const login = async (e) => {
@@ -20,9 +23,7 @@ const Login = () => {
         if (response.ok) {
             const data = await response.json();
             localStorage.setItem('token', data.token); // Store the token in local storage
-            console.log(localStorage.getItem("token"))
-            // alert('Login successful!');
-            navigate('/home'); // Redirect to the dashboard on successful login
+            navigate('/Editor/:folderId/:playgroundId'); // Redirect to the dashboard on successful login
         } else {
             const errorMessage = await response.text();
             alert(`Login failed: ${errorMessage}`); // Display error message

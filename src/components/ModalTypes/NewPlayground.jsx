@@ -5,6 +5,7 @@ import { ModalContext } from '../../context/ModalContext'
 import { PlaygroundContext } from '../../context/PlaygroundContext'
 import Select from 'react-select';
 import styled from 'styled-components';
+import { useNavigate } from 'react-router-dom'
 const InputWithSelect = styled.div`
   display: grid;
   grid-template-columns: 1fr 0.5fr;
@@ -35,7 +36,9 @@ const InputWithSelect = styled.div`
 
 const NewPlayground = () => {
   const { isOpenModal, closeModal } = useContext(ModalContext);
-  const { addfile } = useContext(PlaygroundContext);
+  const navigate = useNavigate(); // Hook for navigation
+
+  const { addfile ,upsucces} = useContext(PlaygroundContext);
 
   const languageOptions = [
     { value: "py", label: "PySpark" },
@@ -51,6 +54,19 @@ const NewPlayground = () => {
   const handleLanguageChange = (selectedOption) => {
     setLanguage(selectedOption);
   };
+  
+  const handleAdd=()=>{
+    if (!cardTitle.trim()) {
+      alert('Title cannot be empty!'); // Prevent updating with an empty or blank title
+      return;
+    }
+    addfile(folderId, cardTitle, language.value)
+    closeModal();
+    if (upsucces) {
+      
+      navigate(`/Editor/${encodeURIComponent(folderId)}/${cardTitle}.${language.value}`);
+    }
+  }
 
   return (
     <>
@@ -70,10 +86,7 @@ const NewPlayground = () => {
           value={language}
           onChange={handleLanguageChange}
         />
-        <button onClick={() => {
-          addfile(folderId, cardTitle, language.value)
-          closeModal();
-        }}> Create New File</button>
+        <button onClick={handleAdd}> Create New File</button>
       </InputWithSelect>
     </>
   )

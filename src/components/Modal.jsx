@@ -1,6 +1,6 @@
 import React, {useContext} from 'react'
 import styled from 'styled-components'
-import { NewFolder, NewPlayground, NewPlaygroundAndFolder, EditFolder, EditPlaygroundTitle, Loading } from './ModalTypes'
+import { NewFolder, NewPlayground, EditFolder, EditPlaygroundTitle, Loading } from './ModalTypes'
 import { ModalContext } from '../context/ModalContext'
 
 const ModalContainer = styled.div`
@@ -74,7 +74,6 @@ const Modal = () => {
       <ModalContent>
         {modalType === 1 && <NewFolder />}
         {modalType === 2 && <NewPlayground />}
-        {modalType === 3 && <NewPlaygroundAndFolder />}
         {modalType === 4 && <EditFolder />}
         {modalType === 5 && <EditPlaygroundTitle />}
         {modalType === 6 && <Loading />}

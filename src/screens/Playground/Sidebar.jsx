@@ -1,179 +1,384 @@
-import React, { useContext } from 'react';
-import { useNavigate } from 'react-router-dom';
-import styled from 'styled-components';
-import { FiFolder, FiFile, FiEdit, FiTrash2, FiFolderPlus, FiFilePlus } from 'react-icons/fi';
-import { ModalContext } from '../../context/ModalContext';
+import React, { useState, useContext, useEffect } from "react";
+import logo from "../../assets/logo.png";
+import styled from "styled-components";
+import {
+  BiFolder,
+  BiFile,
+  BiEditAlt,
+  BiTrash,
+  BiMenu,
+  BiX,
+  BiFolderPlus,
+  BiPlus,
+} from "react-icons/bi";
+import { ModalContext } from "../../context/ModalContext";
+import { PlaygroundContext } from "../../context/PlaygroundContext";
+import { useNavigate } from "react-router-dom";
+import SidebarFooter from "./SidebarFooter";
 
-const SidebarWrapper = styled.div`
-  padding: 10px;
-`;
-
-const Toolbar = styled.div`
+const SidebarContainer = styled.div`
+  position: fixed;
+  border-right: 2px solid #524d4dd4;
+  top: 0;
+  left: 0;
+  width: ${({ isOpen }) => (isOpen ? "200px" : "75px")};
+  height: 100vh;
+  background: #1e1e1e;
+  color: #fff;
+  overflow-x: hidden;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: #666 transparent;
+  transition: width 0.3s ease;
+  z-index: 100;
   display: flex;
-  justify-content: space-between;
-  padding: 5px;
-  margin-bottom: 10px;
+  flex-direction: column;
+  padding: ${({ isOpen }) => (isOpen ? "0rem" : "0")};
+
+  ::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: #666;
+    border-radius: 3px;
+  }
+
+  @media (max-width: 768px) {
+    width: ${({ isOpen }) => (isOpen ? "200px" : "0")};
+  }
 `;
 
-const ToolbarButton = styled.button`
+const ToggleButton = styled.div`
+  position: fixed;
+  top: 1rem;
+  left: ${({ isOpen }) => (isOpen ? "145px" : "1rem")};
+  color: #fff;
+  font-size: 1.5rem;
+  cursor: pointer;
+  z-index: 102;
+  background: #333;
+  padding: 0.5rem;
+  border-radius: 4px;
+  transition: left 0.3s ease;
+`;
+
+const SidebarContent = styled.div`
+  display: ${({ isOpen }) => (isOpen ? "flex" : "none")};
+  flex-direction: column;
+  flex: 1;
+`;
+
+const ActionBar = styled.div`
+  display: flex;
+  gap: 1rem;
+  padding: 0.5rem;
+  justify-content: flex-start;
+`;
+
+const ActionButton = styled.button`
   background: none;
   border: none;
-  color: #d4d4d4;
+  color: #fff;
+  font-size: 1.2rem;
   cursor: pointer;
-  font-size: 16px;
-  &:hover {
-    color: #fff;
-  }
-`;
-
-const Folder = styled.div`
-  margin-bottom: 10px;
-`;
-
-const FolderTitle = styled.div`
   display: flex;
   align-items: center;
-  padding: 5px;
-  cursor: pointer;
+  gap: 0.5rem;
+
   &:hover {
-    background: #2a2d2e;
+    color: #ccc;
   }
 `;
 
-const File = styled.div`
+const FolderList = styled.ul`
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  flex: 1;
+  overflow-y: auto;
+`;
+
+const FolderItem = styled.li`
+  padding: 0.5rem;
+  color: orange;
+  cursor: pointer;
   display: flex;
   align-items: center;
-  padding: 5px 10px;
-  cursor: pointer;
+  gap: 0.5rem;
+  justify-content: space-between;
+  border-bottom: 1px solid #524d4dd4;
+
   &:hover {
-    background: #2a2d2e;
+    background: #333;
   }
 `;
 
-const Icon = styled.span`
-  margin-right: 8px;
+const FileList = styled.ul`
+  list-style: none;
+  padding-left: 1rem;
+  color: #7d7de6e3;
+  margin: 0;
+  display: ${({ isOpen }) => (isOpen ? "block" : "none")};
 `;
 
-const Actions = styled.span`
-  margin-left: auto;
+const FileItem = styled.li`
+  margin-top: 0.7rem;
+  border-bottom: 1px solid rgba(59, 46, 46, 0.83);
+  cursor: pointer;
   display: flex;
-  gap: 8px;
-`;
+  align-items: center;
+  gap: 0.5rem;
+  justify-content: space-between;
 
-const ActionIcon = styled.span`
-  cursor: pointer;
   &:hover {
-    color: #fff;
+    background: #333;
   }
 `;
 
-const Sidebar = ({ folders }) => {
+const IconButton = styled.span`
+  font-size: 0.9rem;
+  margin-left: 0.3rem;
+  color: #ccc;
+  cursor: pointer;
+
+  &:hover {
+    color: blue;
+  }
+`;
+
+const EmptyMessage = styled.div`
+  padding: 0.5rem;
+  color: #ccc;
+`;
+
+const Logo = styled.img`
+  width: 45px;
+  margin-top: 2vh;
+`;
+
+const MainHeading = styled.h1`
+  font-size: 1.5rem;
+  margin-top: 1vh;
+  font-weight: 400;
+  color: #fff;
+  span {
+    font-weight: 700;
+  }
+`;
+
+const Sidebar = ({ isSidebarOpen, setSidebarOpen }) => {
   const navigate = useNavigate();
+  const { folders, deleteFile, deleteFolder, userDetails, fetchFiles, error, loading } =
+    useContext(PlaygroundContext);
   const { openModal } = useContext(ModalContext);
+  const [openFolders, setOpenFolders] = useState({});
 
-  const handleFileClick = (folderId, fileId) => {
-    navigate(`/playground/${folderId}/${fileId}`);
+  useEffect(() => {
+    fetchFiles();
+  }, []);
+
+
+
+  const toggleFolder = (folderId) => {
+    setOpenFolders((prev) => ({
+      ...prev,
+      [folderId]: !prev[folderId],
+    }));
   };
 
-  const handleEditFolder = (folderId) => {
-    openModal({
-      show: true,
-      modalType: 2, // Assuming modalType 2 is for editing folder
-      identifiers: { folderId }
-    });
+  const truncateName = (name, maxLength = 12) => {
+    return name && typeof name === "string" && name.length > maxLength
+      ? name.substring(0, maxLength) + ".."
+      : name || "Untitled";
   };
 
-  const handleDeleteFolder = (folderId) => {
-    openModal({
-      show: true,
-      modalType: 3, // Assuming modalType 3 is for deleting folder
-      identifiers: { folderId }
-    });
+  const username = userDetails.USERNAME|| "Guest";
+
+  const containerStyle = {
+    height: "15vh",
+    display: "flex",
+    flexDirection: "column",
+    justifyContent: "center",
+    alignItems: "center",
+    marginBottom: "5vh",
+    borderBottom: "2px solid transparent",
+    borderImage:
+      "linear-gradient(90deg, rgba(62, 58, 180, 1) 0%, rgba(253, 29, 29, 1) 50%, rgba(252, 176, 69, 1) 100%)",
+    borderImageSlice: 1,
   };
 
-  const handleEditFile = (folderId, fileId) => {
-    openModal({
-      show: true,
-      modalType: 4, // Assuming modalType 4 is for editing file
-      identifiers: { folderId, cardId: fileId }
-    });
+  const gradientTextStyle = {
+    backgroundImage:
+      "linear-gradient(90deg, rgba(62, 58, 180, 1) 0%, rgba(253, 29, 29, 1) 50%, rgba(252, 176, 69, 1) 100%)",
+    WebkitBackgroundClip: "text",
+    WebkitTextFillColor: "transparent",
   };
 
-  const handleDeleteFile = (folderId, fileId) => {
-    openModal({
-      show: true,
-      modalType: 5, // Assuming modalType 5 is for deleting file
-      identifiers: { folderId, cardId: fileId }
-    });
-  };
+  const renderFolder = (folder, depth = 0, path = "") => {
+    if (!folder || !folder.folder) {
+      return null;
+    }
 
-  const handleCreateFolder = () => {
-    openModal({
-      show: true,
-      modalType: 1, // Assuming modalType 1 is for creating folder
-      identifiers: {}
-    });
-  };
+    const currentPath = path ? `${path}/${folder.folder}` : folder.folder;
 
-  const handleCreateFile = () => {
-    openModal({
-      show: true,
-      modalType: 0, // Assuming modalType 0 is for creating file
-      identifiers: {}
-    });
+    return (
+      <div key={currentPath}>
+        <FolderItem
+          onClick={() => toggleFolder(folder.folder)}
+          style={{ paddingLeft: `${depth * 1}rem` }}
+        >
+          <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+            <BiFolder />
+            {truncateName(folder.folder)}
+          </div>
+          <div>
+            <IconButton
+              onClick={() =>
+                openModal({
+                  show: true,
+                  modalType: 1,
+                  identifiers: { folderId: currentPath, cardId: "" },
+                })
+              }
+              title="Add Folder"
+            >
+              <BiFolderPlus />
+            </IconButton>
+            <IconButton
+              onClick={() =>
+                openModal({
+                  show: true,
+                  modalType: 2,
+                  identifiers: { folderId: currentPath, cardId: "" },
+                })
+              }
+              title="New File"
+            >
+              <BiPlus />
+            </IconButton>
+            <IconButton
+              onClick={() =>
+                openModal({
+                  show: true,
+                  modalType: 4,
+                  identifiers: { folderName: folder.folder, folderId: currentPath },
+                })
+              }
+              title="Edit Folder"
+            >
+              <BiEditAlt />
+            </IconButton>
+            <IconButton
+              onClick={() => deleteFolder(currentPath)}
+              title="Delete Folder"
+            >
+              <BiTrash />
+            </IconButton>
+          </div>
+        </FolderItem>
+        <FileList isOpen={openFolders[folder.folder]}>
+          {folder.files?.length ? (
+            folder.files.map((file) => (
+              <FileItem
+  key={file.file}
+  onClick={() => {
+    const encodedPath = encodeURIComponent(currentPath);
+    const encodedFile = encodeURIComponent(file.file);
+    navigate(`/Editor/${encodedPath}/${encodedFile}`);
+  }}
+  style={{ paddingLeft: `${depth * 1}rem` }}
+>
+                <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+                  <BiFile />
+                  {truncateName(file.file,7)}
+                </div>
+                <div>
+                  <IconButton
+                    onClick={() =>
+                      openModal({
+                        show: true,
+                        modalType: 5,
+                        identifiers: { folderId: currentPath, cardId: file.file },
+                      })
+                    }
+                    title="Edit File"
+                  >
+                    <BiEditAlt />
+                  </IconButton>
+                  <IconButton
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      deleteFile(currentPath, file.file);
+                    }}
+                    title="Delete File"
+                  >
+                    <BiTrash />
+                  </IconButton>
+                </div>
+              </FileItem>
+            ))
+          ) : (
+            <EmptyMessage>No files in this folder</EmptyMessage>
+          )}
+        </FileList>
+        {folder.children?.length > 0 && openFolders[folder.folder] && (
+          <FolderList>
+            {folder.children.map((child) => renderFolder(child, depth + 1, currentPath))}
+          </FolderList>
+        )}
+      </div>
+    );
   };
 
   return (
-    <SidebarWrapper>
-      <Toolbar>
-        <h3 style={{ margin: 0, color: '#d4d4d4' }}>Explorer</h3>
-        <div>
-          <ToolbarButton onClick={handleCreateFile} title="New File">
-            <FiFilePlus />
-          </ToolbarButton>
-          <ToolbarButton onClick={handleCreateFolder} title="New Folder">
-            <FiFolderPlus />
-          </ToolbarButton>
-        </div>
-      </Toolbar>
-      {folders && folders.length > 0 ? (
-        folders.map(folder => (
-          <Folder key={folder.folder}>
-            <FolderTitle>
-              <Icon><FiFolder /></Icon>
-              {folder.folder}
-              <Actions>
-                <ActionIcon onClick={() => handleEditFolder(folder.folder)}>
-                  <FiEdit />
-                </ActionIcon>
-                <ActionIcon onClick={() => handleDeleteFolder(folder.folder)}>
-                  <FiTrash2 />
-                </ActionIcon>
-              </Actions>
-            </FolderTitle>
-            {folder.files && folder.files.map(file => (
-              <File
-                key={file.file}
-                onClick={() => handleFileClick(folder.folder, file.file)}
-              >
-                <Icon><FiFile /></Icon>
-                {file.file}
-                <Actions>
-                  <ActionIcon onClick={(e) => { e.stopPropagation(); handleEditFile(folder.folder, file.file); }}>
-                    <FiEdit />
-                  </ActionIcon>
-                  <ActionIcon onClick={(e) => { e.stopPropagation(); handleDeleteFile(folder.folder, file.file); }}>
-                    <FiTrash2 />
-                  </ActionIcon>
-                </Actions>
-              </File>
-            ))}
-          </Folder>
-        ))
-      ) : (
-        <div style={{ padding: '10px', color: '#858585' }}>No folders</div>
-      )}
-    </SidebarWrapper>
+    <>
+      <ToggleButton
+        isOpen={isSidebarOpen}
+        onClick={() => setSidebarOpen(!isSidebarOpen)}
+      >
+        {isSidebarOpen ? <BiX /> : <BiMenu />}
+      </ToggleButton>
+      <SidebarContainer isOpen={isSidebarOpen}>
+        <SidebarContent isOpen={isSidebarOpen}>
+          <div className="logo" style={containerStyle}>
+            <Logo src={logo} />
+            <MainHeading>
+              <span style={gradientTextStyle}>Code</span>Catalyst
+            </MainHeading>
+          </div>
+          <h3 style={{ padding: "0.5rem", margin: "0", color: "yellow" }}>
+            Explorer
+          </h3>
+          <ActionBar>
+            <ActionButton
+              onClick={() =>
+                openModal({
+                  show: true,
+                  modalType: 1,
+                  identifiers: { folderId: folders.folder || "", cardId: "" },
+                })
+              }
+              title="New Folder"
+            >
+              <BiFolderPlus /> New Folder
+            </ActionButton>
+          </ActionBar>
+          {loading ? (
+            <EmptyMessage>Loading...</EmptyMessage>
+          ) : error ? (
+            <EmptyMessage>Error: {error}</EmptyMessage>
+          ) : !folders.children || !Array.isArray(folders.children) || folders.children.length === 0 ? (
+            <EmptyMessage>No folders available</EmptyMessage>
+          ) : (
+            <FolderList>
+              {folders.children.map((child) => renderFolder(child, 0))}
+            </FolderList>
+          )}
+          <SidebarFooter username={username} />
+        </SidebarContent>
+      </SidebarContainer>
+    </>
   );
 };
 

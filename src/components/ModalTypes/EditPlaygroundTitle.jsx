@@ -4,7 +4,10 @@ import { IoCloseSharp } from 'react-icons/io5';
 import { ModalContext } from '../../context/ModalContext';
 import { PlaygroundContext } from '../../context/PlaygroundContext';
 import Select from 'react-select';
+import {  useNavigate } from "react-router-dom";
+
 const EditPlaygroundTitle = () => {
+    const navigate = useNavigate(); // Hook for navigation
 
   const languageOptions = [
     { value: "py", label: "PySpark" },
@@ -12,8 +15,8 @@ const EditPlaygroundTitle = () => {
     { value: "sql", label: "Impala" },
 
   ];
-  const { isOpenModal, closeModal } = useContext(ModalContext); // Access modal state and close handler
-  const { updateFileContent, folders } = useContext(PlaygroundContext); // Access the context for editing
+  const { isOpenModal, closeModal} = useContext(ModalContext); // Access modal state and close handler
+  const { updateFilename, folders ,upsucces } = useContext(PlaygroundContext); // Access the context for editing
 
   const { folderId, cardId } = isOpenModal.identifiers || {}; // Destructure folder and card identifiers safely
   const [language, setLanguage] = useState(languageOptions[0]);
@@ -35,8 +38,14 @@ const EditPlaygroundTitle = () => {
     }
    
     // editPlaygroundTitle(folderId, cardId, playgroundTitle); // Call context function to update
-    updateFileContent(folderId, cardId, playgroundTitle,language.value)
+    updateFilename(folderId, cardId, playgroundTitle,language.value)
     closeModal(); // Close modal after successful update
+
+    if (upsucces) {
+      
+      navigate(`/Editor/${encodeURIComponent(folderId)}/${playgroundTitle}.${language.value}`);
+    }
+    
   };
 
   return (

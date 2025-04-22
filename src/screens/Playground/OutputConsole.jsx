@@ -2,7 +2,7 @@ import React from 'react';
 import { Console, Header } from './InputConsole';
 import { BiExport } from 'react-icons/bi';
 
-const OutputConsole = ({ logs, applicationId, jobId, isSubmitting, language, isFullScreen }) => {
+const OutputConsole = ({ logs, applicationId, isSubmitting, language, }) => {
   const YARN_UI_BASE_URL = 'http://localhost:8088';
 
   const viewYarnApplication = () => {
@@ -33,7 +33,7 @@ const OutputConsole = ({ logs, applicationId, jobId, isSubmitting, language, isF
             paddingBottom: "2px",
             paddingTop: "2px",
             visibility: "visible",
-            color: "hsl(0, 0%, 20%)",}} onClick={viewYarnApplication}>
+            color: "white",}} onClick={viewYarnApplication}>
             <BiExport /> View YARN Application
           </span>
         )}
@@ -41,7 +41,7 @@ const OutputConsole = ({ logs, applicationId, jobId, isSubmitting, language, isF
             paddingBottom: "2px",
             paddingTop: "2px",
             visibility: "visible",
-            color: "hsl(0, 0%, 20%)",}} href={`data:text/plain;charset=utf-8,${encodeURIComponent(logs.join('\n'))}`} download="output.txt">
+            color: "white",}} href={`data:text/plain;charset=utf-8,${encodeURIComponent(logs.join('\n'))}`} download="output.txt">
           <BiExport /> Export Output
         </a>
       </Header>
@@ -51,6 +51,7 @@ const OutputConsole = ({ logs, applicationId, jobId, isSubmitting, language, isF
           padding: '10px',
           fontFamily: 'monospace',
           whiteSpace: 'pre-wrap',
+          height:"25vh",
           maxHeight: '480px',
           overflowY: 'auto',
           maxWidth: '100%',
@@ -63,10 +64,9 @@ const OutputConsole = ({ logs, applicationId, jobId, isSubmitting, language, isF
             parsedData ? (
               <div
                 style={{
-                  width: isFullScreen ? '98vw' : '23vw', // Dynamic width
+                  width: '84vw',// Dynamic width
                   maxWidth: '100%',
                   overflowX: 'auto',
-                  border: '1px solid #ddd',
                   borderRadius: '4px',
                   boxSizing: 'border-box',
                 }}
